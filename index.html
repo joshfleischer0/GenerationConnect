@@ -42,6 +42,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
   display: flex; justify-content: center; gap: 3rem;
   padding: 1.5rem 2rem; background: #162f4d; flex-wrap: wrap;
 }
+.stat { text-align: center; }
 .stat-num { font-size: 1.5rem; font-weight: 600; color: #c9a84c; }
 .stat-label { font-size: 0.72rem; color: #7a9bbf; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
 
@@ -74,13 +75,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .badge {
   font-size: 0.7rem; padding: 3px 10px; border-radius: 20px;
   white-space: nowrap; font-weight: 600; flex-shrink: 0;
+  background: #e8f4e8; color: #1a5a1a;
 }
-.badge-memory { background: #e8eef8; color: #1a3f7a; }
-.badge-assisted { background: #f5ece0; color: #7a4a1a; }
-.badge-senior { background: #f0e8f5; color: #5a1a7a; }
-.badge-hospice { background: #fce8e8; color: #7a1a1a; }
-.badge-nursing { background: #e8f4e8; color: #1a5a1a; }
-
 .card-address { font-size: 0.82rem; color: #888; display: flex; align-items: center; gap: 5px; margin-bottom: 0.75rem; }
 .card-desc { font-size: 0.85rem; color: #555; line-height: 1.5; margin-bottom: 0.75rem; }
 .divider { height: 1px; background: #f0ebe0; margin: 0.75rem 0; }
@@ -104,6 +100,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 footer { background: #0f2a4a; padding: 1.5rem 2rem; text-align: center; }
 footer p { font-size: 0.8rem; color: #5a7a9a; }
 footer strong { color: #c9a84c; }
+
+#map { display: none; }
 </style>
 </head>
 <body>
@@ -147,57 +145,80 @@ footer strong { color: #c9a84c; }
   <p>Built by <strong>GenerationConnect</strong> · Inspired by the Geriatric Care Club at Binghamton University</p>
 </footer>
 
+<div id="map"></div>
+
 <script>
 const GOOGLE_KEY = 'AIzaSyDGzT9cbl5WctcPKI96E6XVBeShCZZa89Q';
+let map, placesService, geocoder;
 
-async function geocode(location) {
-  const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(location)}&key=${GOOGLE_KEY}`;
-  const res = await fetch(url);
-  const data = await res.json();
-  if (data.results && data.results.length > 0) {
-    return data.results[0].geometry.location;
-  }
-  throw new Error('Location not found');
+function initMap() {
+  map = new google.maps.Map(document.getElementById('map'), {
+    center: { lat: 40.7128, lng: -74.0060 },
+    zoom: 12
+  });
+  placesService = new google.maps.places.PlacesService(map);
+  geocoder = new google.maps.Geocoder();
 }
 
-async function searchNearby(lat, lng) {
-  const keywords = ['nursing home', 'assisted living', 'memory care', 'senior center', 'hospice'];
-  const allPlaces = [];
-  for (const kw of keywords) {
-    const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=8000&keyword=${encodeURIComponent(kw)}&key=${GOOGLE_KEY}`;
-    const res = await fetch(url);
-    const data = await res.json();
-    if (data.results) allPlaces.push(...data.results.slice(0, 3));
-  }
-  const seen = new Set();
-  return allPlaces.filter(p => {
-    if (seen.has(p.place_id)) return false;
-    seen.add(p.place_id);
-    return true;
-  }).slice(0, 6);
-}
+function handleSearch() {
+  const loc = document.getElementById('locationInput').value.trim();
+  if (!loc) { document.getElementById('locationInput').focus(); return; }
 
-async function getDetails(placeId) {
-  const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=name,formatted_address,formatted_phone_number,website,rating,types&key=${GOOGLE_KEY}`;
-  const res = await fetch(url);
-  const data = await res.json();
-  return data.result;
-}
+  const btn = document.getElementById('searchBtn');
+  btn.disabled = true;
+  btn.textContent = 'Searching...';
 
-function getBadge(types) {
-  if (!types) return { label: 'Senior Care', cls: 'badge-nursing' };
-  const t = types.join(' ');
-  if (t.includes('lodging') || t.includes('health')) return { label: 'Assisted Living', cls: 'badge-assisted' };
-  return { label: 'Senior Care Facility', cls: 'badge-nursing' };
-}
+  const area = document.getElementById('resultsArea');
+  area.innerHTML = `<div class="loading"><div class="spinner"></div><p>Finding real volunteer opportunities near <strong>${loc}</strong>...</p></div>`;
 
-function getRequirements(name) {
-  return [
-    'Background check required',
-    'Orientation session (approx. 2 hours)',
-    'Minimum age 16 (or 18 for some programs)',
-    'Consistent weekly schedule preferred'
-  ];
+  geocoder.geocode({ address: loc }, function(results, status) {
+    if (status !== 'OK' || !results[0]) {
+      area.innerHTML = `<div class="empty"><i class="ti ti-alert-circle"></i><h3>Location not found</h3><p>Please try a different city or zip code.</p></div>`;
+      btn.disabled = false; btn.textContent = 'Find places →';
+      return;
+    }
+
+    const location = results[0].geometry.location;
+    const userLat = location.lat();
+    const userLng = location.lng();
+    map.setCenter(location);
+
+    const keywords = ['nursing home', 'assisted living', 'memory care', 'senior center', 'hospice'];
+    const allPlaces = [];
+    let completed = 0;
+
+    keywords.forEach(keyword => {
+      const request = {
+        location: location,
+        radius: 8000,
+        keyword: keyword
+      };
+
+      placesService.nearbySearch(request, function(results, status) {
+        if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+          allPlaces.push(...results.slice(0, 3));
+        }
+        completed++;
+        if (completed === keywords.length) {
+          const seen = new Set();
+          const unique = allPlaces.filter(p => {
+            if (seen.has(p.place_id)) return false;
+            seen.add(p.place_id);
+            return true;
+          }).slice(0, 8);
+
+          if (unique.length === 0) {
+            area.innerHTML = `<div class="empty"><i class="ti ti-map-off"></i><h3>No results found</h3><p>Try a nearby city or different zip code.</p></div>`;
+            btn.disabled = false; btn.textContent = 'Find places →';
+            return;
+          }
+
+          renderResults(unique, loc, userLat, userLng);
+          btn.disabled = false; btn.textContent = 'Find places →';
+        }
+      });
+    });
+  });
 }
 
 function haversine(lat1, lng1, lat2, lng2) {
@@ -208,342 +229,53 @@ function haversine(lat1, lng1, lat2, lng2) {
   return (R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))).toFixed(1);
 }
 
-async function handleSearch() {
-  const loc = document.getElementById('locationInput').value.trim();
-  if (!loc) { document.getElementById('locationInput').focus(); return; }
-
-  const btn = document.getElementById('searchBtn');
-  btn.disabled = true; btn.textContent = 'Searching...';
-
+function renderResults(places, loc, userLat, userLng) {
   const area = document.getElementById('resultsArea');
-  area.innerHTML = `<div class="loading"><div class="spinner"></div><p>Finding real volunteer opportunities near <strong>${loc}</strong>...</p></div>`;
+  let html = `<div class="results-header"><h2>${places.length} opportunities near ${loc}</h2><span>Sorted by distance</span></div>`;
 
-  try {
-    const { lat, lng } = await geocode(loc);
-    const places = await searchNearby(lat, lng);
+  places.forEach(place => {
+    const lat = place.geometry.location.lat();
+    const lng = place.geometry.location.lng();
+    const dist = haversine(userLat, userLng, lat, lng);
+    const reqs = [
+      'Background check required',
+      'Orientation session (approx. 2 hours)',
+      'Minimum age 16 (or 18 for some programs)',
+      'Consistent weekly schedule preferred'
+    ].map(r => `<li><i class="ti ti-circle-check"></i>${r}</li>`).join('');
 
-    if (places.length === 0) {
-      area.innerHTML = `<div class="empty"><i class="ti ti-map-off"></i><h3>No results found</h3><p>Try a nearby city or a different zip code.</p></div>`;
-      return;
-    }
+    const phone = place.formatted_phone_number
+      ? `<a class="contact-pill" href="tel:${place.formatted_phone_number}"><i class="ti ti-phone"></i>${place.formatted_phone_number}</a>`
+      : `<span class="contact-pill"><i class="ti ti-phone"></i>Call to inquire</span>`;
 
-    let html = `<div class="results-header"><h2>${places.length} opportunities near ${loc}</h2><span>Sorted by distance</span></div>`;
-
-    for (const place of places) {
-      const dist = haversine(lat, lng, place.geometry.location.lat, place.geometry.location.lng);
-      const badge = getBadge(place.types);
-      const reqs = getRequirements(place.name).map(r => `<li><i class="ti ti-circle-check"></i>${r}</li>`).join('');
-      const phone = place.formatted_phone_number || 'Call to inquire';
-      const phoneLink = place.formatted_phone_number ? `<a class="contact-pill" href="tel:${place.formatted_phone_number}"><i class="ti ti-phone"></i>${place.formatted_phone_number}</a>` : `<span class="contact-pill"><i class="ti ti-phone"></i>Call to inquire</span>`;
-      const website = place.website ? `<a class="contact-pill" href="${place.website}" target="_blank"><i class="ti ti-world"></i>Website</a>` : '';
-
-      html += `<div class="card">
-        <div class="card-top">
-          <div>
-            <div class="card-name">${place.name}</div>
-            <div class="card-address"><i class="ti ti-map-pin" style="font-size:13px"></i>${place.vicinity} · ${dist} miles away</div>
-          </div>
-          <span class="badge ${badge.cls}">${badge.label}</span>
+    html += `<div class="card">
+      <div class="card-top">
+        <div>
+          <div class="card-name">${place.name}</div>
+          <div class="card-address"><i class="ti ti-map-pin" style="font-size:13px"></i>${place.vicinity} · ${dist} miles away</div>
         </div>
-        <p class="card-desc">This facility welcomes volunteers to visit and spend time with residents. Contact them directly to learn about their current volunteer program and scheduling.</p>
-        <div class="divider"></div>
-        <div class="section-label">Typical volunteer requirements</div>
-        <ul class="req-list">${reqs}</ul>
-        <div class="divider"></div>
-        <div class="section-label">Get in touch</div>
-        <div class="contact-row">${phoneLink}${website}</div>
-      </div>`;
-    }
+        <span class="badge">Senior Care</span>
+      </div>
+      <p class="card-desc">This facility welcomes volunteers to visit and spend time with residents. Contact them directly to learn about their current volunteer program and scheduling.</p>
+      <div class="divider"></div>
+      <div class="section-label">Typical volunteer requirements</div>
+      <ul class="req-list">${reqs}</ul>
+      <div class="divider"></div>
+      <div class="section-label">Get in touch</div>
+      <div class="contact-row">${phone}</div>
+    </div>`;
+  });
 
-    html += `<p class="disclaimer">Results pulled from Google Maps. Always call ahead to confirm current volunteer needs and requirements.</p>`;
-    area.innerHTML = html;
-
-  } catch(e) {
-    area.innerHTML = `<div class="empty"><i class="ti ti-alert-circle"></i><h3>Something went wrong</h3><p>${e.message || 'Please try again.'}</p></div>`;
-  } finally {
-    btn.disabled = false; btn.textContent = 'Find places →';
-  }
+  html += `<p class="disclaimer">Results pulled from Google Maps. Always call ahead to confirm current volunteer needs and requirements.</p>`;
+  area.innerHTML = html;
 }
 
 document.getElementById('locationInput').addEventListener('keydown', e => {
   if (e.key === 'Enter') handleSearch();
 });
 </script>
-</body>
-</html>
-ENDOFFILE
-echo "done"
-Output
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GenerationConnect — Find Elder Care Volunteer Opportunities</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
-<style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f0e8; }
 
-.hero {
-  background: #0f2a4a;
-  padding: 3rem 2rem 4rem;
-  text-align: center;
-}
-.logo { font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; color: #c9a84c; font-weight: 600; margin-bottom: 1.5rem; }
-.hero h1 { font-size: 2.4rem; font-weight: 500; color: #f5f0e8; line-height: 1.2; margin-bottom: 0.75rem; }
-.hero h1 em { font-style: normal; color: #c9a84c; }
-.hero p { font-size: 1rem; color: #a8bdd4; max-width: 480px; margin: 0 auto 2rem; line-height: 1.6; }
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDGzT9cbl5WctcPKI96E6XVBeShCZZa89Q&libraries=places&callback=initMap" async defer></script>
 
-.search-box {
-  display: flex; max-width: 540px; margin: 0 auto;
-  background: #fff; border-radius: 12px; overflow: hidden;
-  border: 2px solid #c9a84c;
-}
-.search-box input {
-  flex: 1; padding: 0.9rem 1rem; font-size: 1rem;
-  border: none; outline: none; color: #0f2a4a;
-  font-family: inherit;
-}
-.search-box input::placeholder { color: #8899aa; }
-.search-btn {
-  padding: 0.9rem 1.4rem; background: #c9a84c; border: none;
-  cursor: pointer; font-size: 0.95rem; font-weight: 600;
-  color: #0f2a4a; font-family: inherit;
-}
-.search-btn:hover { background: #b8943d; }
-.search-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-
-.stats {
-  display: flex; justify-content: center; gap: 3rem;
-  padding: 1.5rem 2rem; background: #162f4d; flex-wrap: wrap;
-}
-.stat-num { font-size: 1.5rem; font-weight: 600; color: #c9a84c; }
-.stat-label { font-size: 0.72rem; color: #7a9bbf; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
-
-.results-area { max-width: 780px; margin: 2rem auto; padding: 0 1.5rem 3rem; min-height: 300px; }
-
-.empty { text-align: center; padding: 4rem 1rem; color: #666; }
-.empty i { font-size: 3rem; color: #c9a84c; display: block; margin-bottom: 1rem; }
-.empty h3 { font-size: 1.1rem; color: #333; margin-bottom: 0.5rem; }
-.empty p { font-size: 0.9rem; line-height: 1.6; max-width: 400px; margin: 0 auto; }
-
-.loading { text-align: center; padding: 4rem 1rem; color: #666; }
-.spinner {
-  width: 36px; height: 36px; border: 3px solid #ddd;
-  border-top-color: #c9a84c; border-radius: 50%;
-  animation: spin 0.8s linear infinite; margin: 0 auto 1rem;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-.results-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; }
-.results-header h2 { font-size: 1rem; font-weight: 600; color: #222; }
-.results-header span { font-size: 0.8rem; color: #888; }
-
-.card {
-  background: #fff; border-radius: 12px;
-  border: 1px solid #e0d8cc; padding: 1.25rem;
-  margin-bottom: 1rem;
-}
-.card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 0.5rem; }
-.card-name { font-size: 1rem; font-weight: 600; color: #0f2a4a; }
-.badge {
-  font-size: 0.7rem; padding: 3px 10px; border-radius: 20px;
-  white-space: nowrap; font-weight: 600; flex-shrink: 0;
-}
-.badge-memory { background: #e8eef8; color: #1a3f7a; }
-.badge-assisted { background: #f5ece0; color: #7a4a1a; }
-.badge-senior { background: #f0e8f5; color: #5a1a7a; }
-.badge-hospice { background: #fce8e8; color: #7a1a1a; }
-.badge-nursing { background: #e8f4e8; color: #1a5a1a; }
-
-.card-address { font-size: 0.82rem; color: #888; display: flex; align-items: center; gap: 5px; margin-bottom: 0.75rem; }
-.card-desc { font-size: 0.85rem; color: #555; line-height: 1.5; margin-bottom: 0.75rem; }
-.divider { height: 1px; background: #f0ebe0; margin: 0.75rem 0; }
-.section-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: #aaa; font-weight: 600; margin-bottom: 0.5rem; }
-
-.req-list { list-style: none; margin-bottom: 0.75rem; }
-.req-list li { font-size: 0.85rem; color: #555; padding: 3px 0; display: flex; align-items: flex-start; gap: 7px; }
-.req-list li i { font-size: 14px; color: #c9a84c; margin-top: 2px; flex-shrink: 0; }
-
-.contact-row { display: flex; gap: 0.75rem; flex-wrap: wrap; }
-.contact-pill {
-  display: inline-flex; align-items: center; gap: 5px;
-  font-size: 0.8rem; color: #0f2a4a;
-  background: #e8f0f8; border-radius: 6px;
-  padding: 5px 10px; text-decoration: none;
-}
-.contact-pill:hover { background: #c9d8e8; }
-
-.disclaimer { font-size: 0.78rem; color: #aaa; text-align: center; padding: 1rem 0; line-height: 1.5; }
-
-footer { background: #0f2a4a; padding: 1.5rem 2rem; text-align: center; }
-footer p { font-size: 0.8rem; color: #5a7a9a; }
-footer strong { color: #c9a84c; }
-</style>
-</head>
-<body>
-
-<div class="hero">
-  <div class="logo">GenerationConnect</div>
-  <h1>A conversation can<br><em>change everything.</em></h1>
-  <p>Find elder care volunteer opportunities near you — with everything you need to walk through the door.</p>
-  <div class="search-box">
-    <input type="text" id="locationInput" placeholder="Enter your city or zip code..." />
-    <button class="search-btn" id="searchBtn" onclick="handleSearch()">
-      Find places →
-    </button>
-  </div>
-</div>
-
-<div class="stats">
-  <div class="stat">
-    <div class="stat-num">1 in 3</div>
-    <div class="stat-label">older adults experience loneliness</div>
-  </div>
-  <div class="stat">
-    <div class="stat-num">40%</div>
-    <div class="stat-label">lower dementia risk with social connection</div>
-  </div>
-  <div class="stat">
-    <div class="stat-num">2 hrs/week</div>
-    <div class="stat-label">typical volunteer commitment</div>
-  </div>
-</div>
-
-<div class="results-area" id="resultsArea">
-  <div class="empty">
-    <i class="ti ti-heart"></i>
-    <h3>Ready to make a connection?</h3>
-    <p>Enter your location above to find nursing homes, memory care facilities, senior centers, and hospices near you that welcome volunteers.</p>
-  </div>
-</div>
-
-<footer>
-  <p>Built by <strong>GenerationConnect</strong> · Inspired by the Geriatric Care Club at Binghamton University</p>
-</footer>
-
-<script>
-const GOOGLE_KEY = 'AIzaSyDGzT9cbl5WctcPKI96E6XVBeShCZZa89Q';
-
-async function geocode(location) {
-  const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(location)}&key=${GOOGLE_KEY}`;
-  const res = await fetch(url);
-  const data = await res.json();
-  if (data.results && data.results.length > 0) {
-    return data.results[0].geometry.location;
-  }
-  throw new Error('Location not found');
-}
-
-async function searchNearby(lat, lng) {
-  const keywords = ['nursing home', 'assisted living', 'memory care', 'senior center', 'hospice'];
-  const allPlaces = [];
-  for (const kw of keywords) {
-    const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=8000&keyword=${encodeURIComponent(kw)}&key=${GOOGLE_KEY}`;
-    const res = await fetch(url);
-    const data = await res.json();
-    if (data.results) allPlaces.push(...data.results.slice(0, 3));
-  }
-  const seen = new Set();
-  return allPlaces.filter(p => {
-    if (seen.has(p.place_id)) return false;
-    seen.add(p.place_id);
-    return true;
-  }).slice(0, 6);
-}
-
-async function getDetails(placeId) {
-  const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=name,formatted_address,formatted_phone_number,website,rating,types&key=${GOOGLE_KEY}`;
-  const res = await fetch(url);
-  const data = await res.json();
-  return data.result;
-}
-
-function getBadge(types) {
-  if (!types) return { label: 'Senior Care', cls: 'badge-nursing' };
-  const t = types.join(' ');
-  if (t.includes('lodging') || t.includes('health')) return { label: 'Assisted Living', cls: 'badge-assisted' };
-  return { label: 'Senior Care Facility', cls: 'badge-nursing' };
-}
-
-function getRequirements(name) {
-  return [
-    'Background check required',
-    'Orientation session (approx. 2 hours)',
-    'Minimum age 16 (or 18 for some programs)',
-    'Consistent weekly schedule preferred'
-  ];
-}
-
-function haversine(lat1, lng1, lat2, lng2) {
-  const R = 3958.8;
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLng = (lng2 - lng1) * Math.PI / 180;
-  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
-  return (R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))).toFixed(1);
-}
-
-async function handleSearch() {
-  const loc = document.getElementById('locationInput').value.trim();
-  if (!loc) { document.getElementById('locationInput').focus(); return; }
-
-  const btn = document.getElementById('searchBtn');
-  btn.disabled = true; btn.textContent = 'Searching...';
-
-  const area = document.getElementById('resultsArea');
-  area.innerHTML = `<div class="loading"><div class="spinner"></div><p>Finding real volunteer opportunities near <strong>${loc}</strong>...</p></div>`;
-
-  try {
-    const { lat, lng } = await geocode(loc);
-    const places = await searchNearby(lat, lng);
-
-    if (places.length === 0) {
-      area.innerHTML = `<div class="empty"><i class="ti ti-map-off"></i><h3>No results found</h3><p>Try a nearby city or a different zip code.</p></div>`;
-      return;
-    }
-
-    let html = `<div class="results-header"><h2>${places.length} opportunities near ${loc}</h2><span>Sorted by distance</span></div>`;
-
-    for (const place of places) {
-      const dist = haversine(lat, lng, place.geometry.location.lat, place.geometry.location.lng);
-      const badge = getBadge(place.types);
-      const reqs = getRequirements(place.name).map(r => `<li><i class="ti ti-circle-check"></i>${r}</li>`).join('');
-      const phone = place.formatted_phone_number || 'Call to inquire';
-      const phoneLink = place.formatted_phone_number ? `<a class="contact-pill" href="tel:${place.formatted_phone_number}"><i class="ti ti-phone"></i>${place.formatted_phone_number}</a>` : `<span class="contact-pill"><i class="ti ti-phone"></i>Call to inquire</span>`;
-      const website = place.website ? `<a class="contact-pill" href="${place.website}" target="_blank"><i class="ti ti-world"></i>Website</a>` : '';
-
-      html += `<div class="card">
-        <div class="card-top">
-          <div>
-            <div class="card-name">${place.name}</div>
-            <div class="card-address"><i class="ti ti-map-pin" style="font-size:13px"></i>${place.vicinity} · ${dist} miles away</div>
-          </div>
-          <span class="badge ${badge.cls}">${badge.label}</span>
-        </div>
-        <p class="card-desc">This facility welcomes volunteers to visit and spend time with residents. Contact them directly to learn about their current volunteer program and scheduling.</p>
-        <div class="divider"></div>
-        <div class="section-label">Typical volunteer requirements</div>
-        <ul class="req-list">${reqs}</ul>
-        <div class="divider"></div>
-        <div class="section-label">Get in touch</div>
-        <div class="contact-row">${phoneLink}${website}</div>
-      </div>`;
-    }
-
-    html += `<p class="disclaimer">Results pulled from Google Maps. Always call ahead to confirm current volunteer needs and requirements.</p>`;
-    area.innerHTML = html;
-
-  } catch(e) {
-    area.innerHTML = `<div class="empty"><i class="ti ti-alert-circle"></i><h3>Something went wrong</h3><p>${e.message || 'Please try again.'}</p></div>`;
-  } finally {
-    btn.disabled = false; btn.textContent = 'Find places →';
-  }
-}
-
-document.getElementById('locationInput').addEventListener('keydown', e => {
-  if (e.key === 'Enter') handleSearch();
-});
-</script>
 </body>
 </html>
