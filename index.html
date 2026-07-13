@@ -140,8 +140,19 @@ function handleSearch() {
             btn.disabled = false; btn.textContent = 'Find places →';
             return;
           }
-          renderResults(unique, loc, userLat, userLng);
-          btn.disabled = false; btn.textContent = 'Find places →';
+         let detailsDone = 0;
+unique.forEach(function(place) {
+  placesService.getDetails({ placeId: place.place_id, fields: ['name','vicinity','geometry','formatted_phone_number','place_id'] }, function(result, status) {
+    if (status === google.maps.places.PlacesServiceStatus.OK) {
+      place.formatted_phone_number = result.formatted_phone_number;
+    }
+    detailsDone++;
+    if (detailsDone === unique.length) {
+      renderResults(unique, loc, userLat, userLng);
+      btn.disabled = false; btn.textContent = 'Find places →';
+    }
+  });
+});
         }
       });
     });
