@@ -174,8 +174,30 @@ function renderResults(places, loc, userLat, userLng) {
     const lat = place.geometry.location.lat();
     const lng = place.geometry.location.lng();
     const dist = haversine(userLat, userLng, lat, lng);
-    const reqs = ['Background check required','Orientation session (approx. 2 hours)','Minimum age 16 (or 18 for some programs)','Consistent weekly schedule preferred']
-      .map(function(r) { return '<li><i class="ti ti-circle-check"></i>' + r + '</li>'; }).join('');
+  const name = place.name;
+const type = name.toLowerCase().includes('hospice') ? 'hospice' :
+             name.toLowerCase().includes('memory') ? 'memory care' :
+             name.toLowerCase().includes('senior') || name.toLowerCase().includes('center') ? 'senior center' :
+             name.toLowerCase().includes('assisted') ? 'assisted living' : 'nursing home';
+
+const descriptions = {
+  'hospice': 'Volunteers provide companionship and emotional support to patients and families during end-of-life care. A deeply meaningful and impactful experience.',
+  'memory care': 'Volunteers engage residents living with Alzheimer\'s and dementia through conversation, music, and activities. Training provided for working with memory loss patients.',
+  'senior center': 'Volunteers lead activities, share meals, and build friendships with independent older adults in a community setting. Great for first-time volunteers.',
+  'assisted living': 'Volunteers visit residents, assist with recreational activities, and provide social interaction for older adults who need some daily support.',
+  'nursing home': 'Volunteers spend time with residents through conversation, reading, games, and companionship. One of the most impactful things you can do for someone\'s wellbeing.'
+};
+
+const reqsByType = {
+  'hospice': ['Hospice-specific volunteer training (4-8 hrs)', 'Background check required', 'Minimum age 18', 'Monthly commitment of at least 4 hours'],
+  'memory care': ['Dementia care orientation required', 'Background check required', 'Minimum age 18', 'Weekly visits strongly preferred'],
+  'senior center': ['Brief orientation session (1-2 hrs)', 'Background check may be required', 'Minimum age 14 with parent permission', 'Flexible scheduling available'],
+  'assisted living': ['Background check required', 'Orientation session (2 hrs)', 'Minimum age 16', 'Weekly 2-hour commitment preferred'],
+  'nursing home': ['Background check required', 'Orientation session (2-3 hrs)', 'Minimum age 16 (or 18 for some programs)', 'Consistent weekly schedule preferred']
+};
+
+const desc = descriptions[type];
+const reqs = reqsByType[type].map(function(r) { return '<li><i class="ti ti-circle-check"></i>' + r + '</li>'; }).join('');
     const phone = place.formatted_phone_number
       ? '<a class="contact-pill" href="tel:' + place.formatted_phone_number + '"><i class="ti ti-phone"></i>' + place.formatted_phone_number + '</a>'
       : '<span class="contact-pill"><i class="ti ti-phone"></i>Call to inquire</span>';
