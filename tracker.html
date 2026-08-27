@@ -15,8 +15,10 @@ nav { background: #0f2a4a; padding: 1rem 2rem; display: flex; align-items: cente
 .hero { background: #0f2a4a; padding: 2.5rem 2rem 3rem; text-align: center; }
 .hero h1 { font-size: 1.9rem; font-weight: 500; color: #f5f0e8; margin-bottom: 0.5rem; }
 .hero h1 em { font-style: normal; color: #c9a84c; }
-.hero p { font-size: 0.95rem; color: #a8bdd4; max-width: 480px; margin: 0 auto; line-height: 1.6; }
+.hero p { font-size: 0.95rem; color: #a8bdd4; max-width: 500px; margin: 0 auto; line-height: 1.6; }
 .main { max-width: 780px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+.notice { background: #fff8e8; border: 1px solid #e8d49a; border-radius: 10px; padding: 0.85rem 1rem; margin-bottom: 1.5rem; font-size: 0.82rem; color: #7a6020; display: flex; align-items: flex-start; gap: 8px; line-height: 1.5; }
+.notice i { flex-shrink: 0; margin-top: 1px; }
 .setup-card { background: #fff; border-radius: 14px; border: 1px solid #e0d8cc; padding: 1.5rem; margin-bottom: 1.5rem; }
 .setup-card h2 { font-size: 1rem; font-weight: 600; color: #0f2a4a; margin-bottom: 1rem; }
 .input-row { display: flex; gap: 0.75rem; flex-wrap: wrap; }
@@ -38,7 +40,12 @@ nav { background: #0f2a4a; padding: 1rem 2rem; display: flex; align-items: cente
 .field label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: #aaa; font-weight: 600; }
 .field input, .field select, .field textarea { padding: 0.7rem 0.85rem; border: 1px solid #ddd; border-radius: 8px; font-size: 0.9rem; font-family: inherit; color: #222; outline: none; }
 .field input:focus, .field select:focus, .field textarea:focus { border-color: #c9a84c; }
-.field textarea { resize: vertical; min-height: 70px; }
+.field textarea { resize: vertical; min-height: 80px; }
+.field .hint { font-size: 0.75rem; color: #aaa; margin-top: 2px; line-height: 1.4; }
+.category-toggle { display: flex; gap: 0.5rem; }
+.cat-btn { flex: 1; padding: 0.6rem; border: 1.5px solid #ddd; border-radius: 8px; background: #fff; font-size: 0.82rem; font-weight: 600; cursor: pointer; font-family: inherit; color: #888; transition: all 0.15s; text-align: center; }
+.cat-btn.active-clinical { border-color: #1a5a7a; background: #e8f4f8; color: #1a5a7a; }
+.cat-btn.active-nonclinical { border-color: #5a1a7a; background: #f0e8f8; color: #5a1a7a; }
 .btn-log { width: 100%; padding: 0.85rem; background: #c9a84c; color: #0f2a4a; border: none; border-radius: 8px; font-size: 0.95rem; font-weight: 700; cursor: pointer; font-family: inherit; }
 .btn-log:hover { background: #b8943d; }
 .entries-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem; }
@@ -48,14 +55,20 @@ nav { background: #0f2a4a; padding: 1rem 2rem; display: flex; align-items: cente
 .entry-card { background: #fff; border-radius: 12px; border: 1px solid #e0d8cc; padding: 1rem 1.25rem; margin-bottom: 0.75rem; display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
 .entry-left { flex: 1; }
 .entry-facility { font-weight: 600; color: #0f2a4a; font-size: 0.95rem; margin-bottom: 0.2rem; }
-.entry-meta { font-size: 0.82rem; color: #888; display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.3rem; }
+.entry-meta { font-size: 0.82rem; color: #888; display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.25rem; }
+.entry-supervisor { font-size: 0.8rem; color: #888; margin-top: 0.2rem; }
 .entry-notes { font-size: 0.82rem; color: #666; font-style: italic; margin-top: 0.3rem; line-height: 1.5; }
+.entry-right { display: flex; flex-direction: column; align-items: flex-end; gap: 0.4rem; }
 .entry-hours { font-size: 1.2rem; font-weight: 700; color: #c9a84c; white-space: nowrap; }
+.cat-tag { font-size: 0.68rem; font-weight: 600; padding: 2px 8px; border-radius: 10px; white-space: nowrap; }
+.cat-tag.clinical { background: #e8f4f8; color: #1a5a7a; }
+.cat-tag.nonclinical { background: #f0e8f8; color: #5a1a7a; }
 .btn-delete { background: none; border: none; color: #ccc; cursor: pointer; font-size: 18px; padding: 0; line-height: 1; }
 .btn-delete:hover { color: #e05555; }
 .empty-entries { text-align: center; padding: 3rem 1rem; color: #aaa; }
 .empty-entries i { font-size: 2.5rem; display: block; margin-bottom: 0.75rem; color: #ddd; }
 .empty-entries p { font-size: 0.9rem; }
+.section-divider { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: #bbb; font-weight: 600; margin: 0.5rem 0 0.75rem; }
 .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: #0f2a4a; color: #fff; padding: 0.75rem 1.25rem; border-radius: 8px; font-size: 0.85rem; font-weight: 500; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 999; }
 .toast.show { opacity: 1; }
 @media (max-width: 500px) { .form-grid { grid-template-columns: 1fr; } .form-grid .full { grid-column: 1; } }
@@ -69,11 +82,16 @@ nav { background: #0f2a4a; padding: 1rem 2rem; display: flex; align-items: cente
 </nav>
 
 <div class="hero">
-  <h1>Your <em>volunteer hours,</em> tracked.</h1>
-  <p>Log every visit, track your total hours, and download a verified summary for med school, PA, or nursing applications.</p>
+  <h1>Building hours for <em>Med, PA, or Nursing school?</em></h1>
+  <p>Track your visits, log meaningful patient interactions, and generate an application-ready PDF summary for AMCAS, CASPA, and NursingCAS.</p>
 </div>
 
 <div class="main">
+
+  <div class="notice">
+    <i class="ti ti-info-circle"></i>
+    <span>Your data is saved to this browser only. Export your PDF regularly as a backup, and avoid clearing your browser cache so you don't lose your entries.</span>
+  </div>
 
   <div class="setup-card">
     <h2>Your profile</h2>
@@ -92,26 +110,30 @@ nav { background: #0f2a4a; padding: 1rem 2rem; display: flex; align-items: cente
 
   <div class="stats-bar">
     <div class="stat-box"><div class="stat-box-num" id="totalHours">0</div><div class="stat-box-label">Total hours</div></div>
+    <div class="stat-box"><div class="stat-box-num" id="clinicalHours">0</div><div class="stat-box-label">Clinical hours</div></div>
     <div class="stat-box"><div class="stat-box-num" id="totalVisits">0</div><div class="stat-box-label">Visits logged</div></div>
-    <div class="stat-box"><div class="stat-box-num" id="totalFacilities">0</div><div class="stat-box-label">Facilities visited</div></div>
-    <div class="stat-box"><div class="stat-box-num" id="totalWeeks">0</div><div class="stat-box-label">Weeks active</div></div>
+    <div class="stat-box"><div class="stat-box-num" id="totalFacilities">0</div><div class="stat-box-label">Facilities</div></div>
   </div>
 
   <div class="log-card">
     <h2>Log a visit</h2>
     <div class="form-grid">
+
       <div class="field full">
         <label>Facility name</label>
         <input type="text" id="facilityName" placeholder="e.g. Sunrise Senior Living" />
       </div>
+
       <div class="field">
         <label>Date of visit</label>
         <input type="date" id="visitDate" />
       </div>
+
       <div class="field">
         <label>Hours spent</label>
         <input type="number" id="visitHours" placeholder="e.g. 2" min="0.5" max="12" step="0.5" />
       </div>
+
       <div class="field">
         <label>Type of facility</label>
         <select id="facilityType">
@@ -123,14 +145,36 @@ nav { background: #0f2a4a; padding: 1rem 2rem; display: flex; align-items: cente
           <option>Hospice</option>
         </select>
       </div>
+
       <div class="field">
         <label>Activity (optional)</label>
         <input type="text" id="visitActivity" placeholder="e.g. Conversation, games, music" />
       </div>
+
+      <div class="field full">
+        <label>Experience category</label>
+        <div class="category-toggle">
+          <button class="cat-btn active-clinical" id="btnClinical" onclick="setCategory('clinical')">Clinical / Patient-Facing</button>
+          <button class="cat-btn" id="btnNonclinical" onclick="setCategory('nonclinical')">Community / Non-Clinical</button>
+        </div>
+        <span class="hint">Memory care and hospice visits often count as clinical. Senior centers are typically non-clinical. Check your program's guidelines.</span>
+      </div>
+
+      <div class="field full">
+        <label>Supervisor / Coordinator name</label>
+        <input type="text" id="supervisorName" placeholder="e.g. Jane Smith, Activities Director" />
+      </div>
+
+      <div class="field full">
+        <label>Supervisor contact (email or phone)</label>
+        <input type="text" id="supervisorContact" placeholder="e.g. jsmith@sunrisesenior.com or (555) 123-4567" />
+      </div>
+
       <div class="field full">
         <label>Reflection (optional)</label>
-        <textarea id="visitNotes" placeholder="What did you talk about? What did you learn?"></textarea>
+        <textarea id="visitNotes" placeholder="Tip: Note a specific resident interaction, a conversation topic, or something you learned. These details are gold for future med school essays."></textarea>
       </div>
+
     </div>
     <button class="btn-log" onclick="logVisit()">Log this visit</button>
   </div>
@@ -138,7 +182,7 @@ nav { background: #0f2a4a; padding: 1rem 2rem; display: flex; align-items: cente
   <div class="entries-header">
     <h2>Visit log</h2>
     <button class="btn-download" onclick="downloadPDF()">
-      <i class="ti ti-download"></i> Download summary PDF
+      <i class="ti ti-download"></i> Download application-ready PDF
     </button>
   </div>
   <div id="entriesList"></div>
@@ -151,6 +195,7 @@ nav { background: #0f2a4a; padding: 1rem 2rem; display: flex; align-items: cente
 <script>
 let entries = JSON.parse(localStorage.getItem('gc_entries') || '[]');
 let profile = JSON.parse(localStorage.getItem('gc_profile') || '{}');
+let selectedCategory = 'clinical';
 
 function init() {
   if (profile.name) document.getElementById('volunteerName').value = profile.name;
@@ -158,6 +203,12 @@ function init() {
   document.getElementById('visitDate').value = new Date().toISOString().split('T')[0];
   renderEntries();
   updateStats();
+}
+
+function setCategory(cat) {
+  selectedCategory = cat;
+  document.getElementById('btnClinical').className = 'cat-btn' + (cat === 'clinical' ? ' active-clinical' : '');
+  document.getElementById('btnNonclinical').className = 'cat-btn' + (cat === 'nonclinical' ? ' active-nonclinical' : '');
 }
 
 function saveProfile() {
@@ -174,10 +225,15 @@ function logVisit() {
   const type = document.getElementById('facilityType').value;
   const activity = document.getElementById('visitActivity').value.trim();
   const notes = document.getElementById('visitNotes').value.trim();
+  const supervisorName = document.getElementById('supervisorName').value.trim();
+  const supervisorContact = document.getElementById('supervisorContact').value.trim();
+  const category = selectedCategory;
+
   if (!facility) { showToast('Please enter a facility name.'); return; }
   if (!date) { showToast('Please select a date.'); return; }
   if (!hours || hours <= 0) { showToast('Please enter valid hours.'); return; }
-  const entry = { id: Date.now(), facility, date, hours, type, activity, notes };
+
+  const entry = { id: Date.now(), facility, date, hours, type, activity, notes, supervisorName, supervisorContact, category };
   entries.unshift(entry);
   localStorage.setItem('gc_entries', JSON.stringify(entries));
   renderEntries();
@@ -200,7 +256,10 @@ function clearForm() {
   document.getElementById('facilityType').value = '';
   document.getElementById('visitActivity').value = '';
   document.getElementById('visitNotes').value = '';
+  document.getElementById('supervisorName').value = '';
+  document.getElementById('supervisorContact').value = '';
   document.getElementById('visitDate').value = new Date().toISOString().split('T')[0];
+  setCategory('clinical');
 }
 
 function renderEntries() {
@@ -209,8 +268,14 @@ function renderEntries() {
     list.innerHTML = '<div class="empty-entries"><i class="ti ti-clipboard-list"></i><p>No visits logged yet. Add your first one above.</p></div>';
     return;
   }
-  list.innerHTML = entries.map(function(e) {
+
+  const clinical = entries.filter(function(e) { return e.category === 'clinical'; });
+  const nonclinical = entries.filter(function(e) { return e.category !== 'clinical'; });
+
+  function renderCard(e) {
     const dateStr = new Date(e.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+    const catLabel = e.category === 'clinical' ? 'Clinical' : 'Non-Clinical';
+    const catClass = e.category === 'clinical' ? 'clinical' : 'nonclinical';
     return '<div class="entry-card">' +
       '<div class="entry-left">' +
         '<div class="entry-facility">' + e.facility + '</div>' +
@@ -219,28 +284,37 @@ function renderEntries() {
           (e.type ? '<span><i class="ti ti-building" style="font-size:13px"></i> ' + e.type + '</span>' : '') +
           (e.activity ? '<span><i class="ti ti-activity" style="font-size:13px"></i> ' + e.activity + '</span>' : '') +
         '</div>' +
+        (e.supervisorName ? '<div class="entry-supervisor"><i class="ti ti-user" style="font-size:12px"></i> ' + e.supervisorName + (e.supervisorContact ? ' · ' + e.supervisorContact : '') + '</div>' : '') +
         (e.notes ? '<div class="entry-notes">"' + e.notes + '"</div>' : '') +
       '</div>' +
-      '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:0.5rem;">' +
+      '<div class="entry-right">' +
         '<div class="entry-hours">' + e.hours + 'h</div>' +
+        '<span class="cat-tag ' + catClass + '">' + catLabel + '</span>' +
         '<button class="btn-delete" onclick="deleteEntry(' + e.id + ')"><i class="ti ti-trash"></i></button>' +
       '</div>' +
     '</div>';
-  }).join('');
+  }
+
+  let html = '';
+  if (clinical.length > 0) {
+    html += '<div class="section-divider">Clinical / Patient-Facing</div>';
+    html += clinical.map(renderCard).join('');
+  }
+  if (nonclinical.length > 0) {
+    html += '<div class="section-divider">Community / Non-Clinical</div>';
+    html += nonclinical.map(renderCard).join('');
+  }
+  list.innerHTML = html;
 }
 
 function updateStats() {
   const totalHours = entries.reduce(function(sum, e) { return sum + e.hours; }, 0);
+  const clinHours = entries.filter(function(e) { return e.category === 'clinical'; }).reduce(function(sum, e) { return sum + e.hours; }, 0);
   const facilities = new Set(entries.map(function(e) { return e.facility; }));
-  const weeks = new Set(entries.map(function(e) {
-    const d = new Date(e.date + 'T12:00:00');
-    const start = new Date(d.getFullYear(), 0, 1);
-    return d.getFullYear() + '-W' + Math.ceil(((d - start) / 86400000 + start.getDay() + 1) / 7);
-  }));
   document.getElementById('totalHours').textContent = totalHours % 1 === 0 ? totalHours : totalHours.toFixed(1);
+  document.getElementById('clinicalHours').textContent = clinHours % 1 === 0 ? clinHours : clinHours.toFixed(1);
   document.getElementById('totalVisits').textContent = entries.length;
   document.getElementById('totalFacilities').textContent = facilities.size;
-  document.getElementById('totalWeeks').textContent = weeks.size;
 }
 
 function showToast(msg) {
@@ -257,8 +331,11 @@ function downloadPDF() {
   const name = profile.name || 'Volunteer';
   const org = profile.org || '';
   const totalHours = entries.reduce(function(sum, e) { return sum + e.hours; }, 0);
+  const clinHours = entries.filter(function(e) { return e.category === 'clinical'; }).reduce(function(sum, e) { return sum + e.hours; }, 0);
   const facilities = new Set(entries.map(function(e) { return e.facility; }));
   const today = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
+  // Header
   doc.setFillColor(15, 42, 74);
   doc.rect(0, 0, 210, 40, 'F');
   doc.setTextColor(201, 168, 76);
@@ -268,8 +345,10 @@ function downloadPDF() {
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(168, 189, 212);
-  doc.text('Volunteer Hours Summary', 15, 24);
+  doc.text('Volunteer Hours Summary — Application Ready', 15, 24);
   doc.text('generation-connect.vercel.app', 15, 31);
+
+  // Volunteer info
   doc.setTextColor(15, 42, 74);
   doc.setFontSize(14);
   doc.setFont('helvetica', 'bold');
@@ -279,60 +358,92 @@ function downloadPDF() {
   doc.setTextColor(100, 100, 100);
   if (org) doc.text(org, 15, 61);
   doc.text('Generated: ' + today, 15, org ? 68 : 61);
+
+  // Stats boxes
   const boxY = org ? 76 : 70;
   const boxes = [
     { label: 'Total Hours', value: totalHours % 1 === 0 ? totalHours : totalHours.toFixed(1) },
+    { label: 'Clinical Hours', value: clinHours % 1 === 0 ? clinHours : clinHours.toFixed(1) },
     { label: 'Visits', value: entries.length },
     { label: 'Facilities', value: facilities.size }
   ];
   boxes.forEach(function(b, i) {
-    const x = 15 + i * 62;
+    const x = 15 + i * 45;
     doc.setFillColor(245, 240, 232);
-    doc.roundedRect(x, boxY, 56, 22, 3, 3, 'F');
+    doc.roundedRect(x, boxY, 40, 22, 3, 3, 'F');
     doc.setTextColor(201, 168, 76);
-    doc.setFontSize(16);
+    doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
-    doc.text(String(b.value), x + 28, boxY + 12, { align: 'center' });
+    doc.text(String(b.value), x + 20, boxY + 12, { align: 'center' });
     doc.setTextColor(120, 120, 120);
-    doc.setFontSize(8);
+    doc.setFontSize(7);
     doc.setFont('helvetica', 'normal');
-    doc.text(b.label, x + 28, boxY + 19, { align: 'center' });
+    doc.text(b.label, x + 20, boxY + 19, { align: 'center' });
   });
+
+  // Table
   const tableY = boxY + 30;
   doc.setFillColor(15, 42, 74);
   doc.rect(15, tableY, 180, 9, 'F');
   doc.setTextColor(255, 255, 255);
-  doc.setFontSize(8);
+  doc.setFontSize(7.5);
   doc.setFont('helvetica', 'bold');
-  doc.text('Date', 18, tableY + 6);
-  doc.text('Facility', 50, tableY + 6);
-  doc.text('Type', 115, tableY + 6);
-  doc.text('Activity', 145, tableY + 6);
-  doc.text('Hours', 183, tableY + 6);
+  doc.text('Date', 17, tableY + 6);
+  doc.text('Facility', 45, tableY + 6);
+  doc.text('Type', 100, tableY + 6);
+  doc.text('Category', 130, tableY + 6);
+  doc.text('Supervisor', 158, tableY + 6);
+  doc.text('Hrs', 191, tableY + 6);
+
   let y = tableY + 9;
   const sorted = entries.slice().sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
   sorted.forEach(function(e, i) {
-    if (y > 270) { doc.addPage(); y = 20; }
-    if (i % 2 === 0) { doc.setFillColor(250, 248, 244); doc.rect(15, y, 180, 9, 'F'); }
+    if (y > 265) { doc.addPage(); y = 20; }
+    const rowH = e.supervisorName ? 12 : 9;
+    if (i % 2 === 0) { doc.setFillColor(250, 248, 244); doc.rect(15, y, 180, rowH, 'F'); }
     doc.setTextColor(60, 60, 60);
-    doc.setFontSize(8);
+    doc.setFontSize(7.5);
     doc.setFont('helvetica', 'normal');
-    const dateStr = new Date(e.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-    doc.text(dateStr, 18, y + 6);
-    doc.text(e.facility.length > 28 ? e.facility.substring(0, 28) + '...' : e.facility, 50, y + 6);
-    doc.text(e.type || '', 115, y + 6);
-    doc.text(e.activity ? (e.activity.length > 16 ? e.activity.substring(0, 16) + '...' : e.activity) : '', 145, y + 6);
+    const dateStr = new Date(e.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' });
+    doc.text(dateStr, 17, y + 6);
+    doc.text(e.facility.length > 22 ? e.facility.substring(0, 22) + '...' : e.facility, 45, y + 6);
+    doc.text(e.type || '', 100, y + 6);
+    const catLabel = e.category === 'clinical' ? 'Clinical' : 'Non-Clinical';
+    doc.text(catLabel, 130, y + 6);
+    if (e.supervisorName) {
+      doc.text(e.supervisorName.length > 14 ? e.supervisorName.substring(0, 14) + '...' : e.supervisorName, 158, y + 5);
+      if (e.supervisorContact) {
+        doc.setFontSize(6.5);
+        doc.setTextColor(120, 120, 120);
+        doc.text(e.supervisorContact.length > 18 ? e.supervisorContact.substring(0, 18) + '...' : e.supervisorContact, 158, y + 10);
+        doc.setFontSize(7.5);
+        doc.setTextColor(60, 60, 60);
+      }
+    }
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(201, 168, 76);
-    doc.text(e.hours + 'h', 185, y + 6);
-    y += 9;
+    doc.text(e.hours + 'h', 192, y + 6);
+    y += rowH;
   });
+
+  // Verification line
+  y += 8;
+  if (y > 260) { doc.addPage(); y = 20; }
+  doc.setDrawColor(200, 200, 200);
+  doc.line(15, y, 195, y);
+  y += 7;
+  doc.setTextColor(120, 120, 120);
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'normal');
+  doc.text('This document was generated by the volunteer and is intended for application purposes. Verifying contacts are listed above.', 15, y);
+
+  // Footer
   doc.setFillColor(15, 42, 74);
   doc.rect(0, 285, 210, 12, 'F');
   doc.setTextColor(90, 122, 154);
   doc.setFontSize(7);
-  doc.setFont('helvetica', 'normal');
   doc.text('GenerationConnect  |  generation-connect.vercel.app  |  Connecting volunteers with elder care facilities', 105, 292, { align: 'center' });
+
   const filename = (name.replace(/\s+/g, '_') || 'Volunteer') + '_GenerationConnect_Hours.pdf';
   doc.save(filename);
 }
