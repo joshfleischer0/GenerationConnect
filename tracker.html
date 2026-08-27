@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Volunteer Hours Tracker — GenerationConnect</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f0e8; }
+nav { background: #0f2a4a; padding: 1rem 2rem; display: flex; align-items: center; justify-content: space-between; }
+.nav-logo { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #c9a84c; font-weight: 600; text-decoration: none; }
+.nav-back { font-size: 0.85rem; color: #a8bdd4; text-decoration: none; display: flex; align-items: center; gap: 5px; }
+.nav-back:hover { color: #c9a84c; }
+.hero { background: #0f2a4a; padding: 2.5rem 2rem 3rem; text-align: center; }
+.hero h1 { font-size: 1.9rem; font-weight: 500; color: #f5f0e8; margin-bottom: 0.5rem; }
+.hero h1 em { font-style: normal; color: #c9a84c; }
+.hero p { font-size: 0.95rem; color: #a8bdd4; max-width: 480px; margin: 0 auto; line-height: 1.6; }
+.main { max-width: 780px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+.setup-card { background: #fff; border-radius: 14px; border: 1px solid #e0d8cc; padding: 1.5rem; margin-bottom: 1.5rem; }
+.setup-card h2 { font-size: 1rem; font-weight: 600; color: #0f2a4a; margin-bottom: 1rem; }
+.input-row { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+.input-group { display: flex; flex-direction: column; gap: 0.35rem; flex: 1; min-width: 180px; }
+.input-group label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: #aaa; font-weight: 600; }
+.input-group input { padding: 0.7rem 0.85rem; border: 1px solid #ddd; border-radius: 8px; font-size: 0.9rem; font-family: inherit; color: #222; outline: none; }
+.input-group input:focus { border-color: #c9a84c; }
+.btn-save { padding: 0.7rem 1.25rem; background: #0f2a4a; color: #fff; border: none; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; font-family: inherit; white-space: nowrap; align-self: flex-end; }
+.btn-save:hover { background: #162f4d; }
+.stats-bar { display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+.stat-box { background: #fff; border-radius: 12px; border: 1px solid #e0d8cc; padding: 1rem 1.25rem; flex: 1; min-width: 120px; text-align: center; }
+.stat-box-num { font-size: 1.6rem; font-weight: 600; color: #c9a84c; }
+.stat-box-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: #aaa; margin-top: 2px; }
+.log-card { background: #fff; border-radius: 14px; border: 1px solid #e0d8cc; padding: 1.5rem; margin-bottom: 1.5rem; }
+.log-card h2 { font-size: 1rem; font-weight: 600; color: #0f2a4a; margin-bottom: 1rem; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem; }
+.form-grid .full { grid-column: 1 / -1; }
+.field { display: flex; flex-direction: column; gap: 0.35rem; }
+.field label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: #aaa; font-weight: 600; }
+.field input, .field select, .field textarea { padding: 0.7rem 0.85rem; border: 1px solid #ddd; border-radius: 8px; font-size: 0.9rem; font-family: inherit; color: #222; outline: none; }
+.field input:focus, .field select:focus, .field textarea:focus { border-color: #c9a84c; }
+.field textarea { resize: vertical; min-height: 70px; }
+.btn-log { width: 100%; padding: 0.85rem; background: #c9a84c; color: #0f2a4a; border: none; border-radius: 8px; font-size: 0.95rem; font-weight: 700; cursor: pointer; font-family: inherit; }
+.btn-log:hover { background: #b8943d; }
+.entries-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem; }
+.entries-header h2 { font-size: 1rem; font-weight: 600; color: #0f2a4a; }
+.btn-download { display: inline-flex; align-items: center; gap: 6px; padding: 0.6rem 1rem; background: #0f2a4a; color: #fff; border: none; border-radius: 8px; font-size: 0.82rem; font-weight: 600; cursor: pointer; font-family: inherit; }
+.btn-download:hover { background: #162f4d; }
+.entry-card { background: #fff; border-radius: 12px; border: 1px solid #e0d8cc; padding: 1rem 1.25rem; margin-bottom: 0.75rem; display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+.entry-left { flex: 1; }
+.entry-facility { font-weight: 600; color: #0f2a4a; font-size: 0.95rem; margin-bottom: 0.2rem; }
+.entry-meta { font-size: 0.82rem; color: #888; display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.3rem; }
+.entry-notes { font-size: 0.82rem; color: #666; font-style: italic; margin-top: 0.3rem; line-height: 1.5; }
+.entry-hours { font-size: 1.2rem; font-weight: 700; color: #c9a84c; white-space: nowrap; }
+.btn-delete { background: none; border: none; color: #ccc; cursor: pointer; font-size: 18px; padding: 0; line-height: 1; }
+.btn-delete:hover { color: #e05555; }
+.empty-entries { text-align: center; padding: 3rem 1rem; color: #aaa; }
+.empty-entries i { font-size: 2.5rem; display: block; margin-bottom: 0.75rem; color: #ddd; }
+.empty-entries p { font-size: 0.9rem; }
+.toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: #0f2a4a; color: #fff; padding: 0.75rem 1.25rem; border-radius: 8px; font-size: 0.85rem; font-weight: 500; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 999; }
+.toast.show { opacity: 1; }
+@media (max-width: 500px) { .form-grid { grid-template-columns: 1fr; } .form-grid .full { grid-column: 1; } }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">GenerationConnect</a>
+  <a href="/" class="nav-back"><i class="ti ti-arrow-left"></i> Back to search</a>
+</nav>
+
+<div class="hero">
+  <h1>Your <em>volunteer hours,</em> tracked.</h1>
+  <p>Log every visit, track your total hours, and download a verified summary for med school, PA, or nursing applications.</p>
+</div>
+
+<div class="main">
+
+  <div class="setup-card">
+    <h2>Your profile</h2>
+    <div class="input-row">
+      <div class="input-group">
+        <label>Your full name</label>
+        <input type="text" id="volunteerName" placeholder="e.g. Joshua Fleischer" />
+      </div>
+      <div class="input-group">
+        <label>University / Organization</label>
+        <input type="text" id="volunteerOrg" placeholder="e.g. Binghamton University" />
+      </div>
+      <button class="btn-save" onclick="saveProfile()">Save</button>
+    </div>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat-box"><div class="stat-box-num" id="totalHours">0</div><div class="stat-box-label">Total hours</div></div>
+    <div class="stat-box"><div class="stat-box-num" id="totalVisits">0</div><div class="stat-box-label">Visits logged</div></div>
+    <div class="stat-box"><div class="stat-box-num" id="totalFacilities">0</div><div class="stat-box-label">Facilities visited</div></div>
+    <div class="stat-box"><div class="stat-box-num" id="totalWeeks">0</div><div class="stat-box-label">Weeks active</div></div>
+  </div>
+
+  <div class="log-card">
+    <h2>Log a visit</h2>
+    <div class="form-grid">
+      <div class="field full">
+        <label>Facility name</label>
+        <input type="text" id="facilityName" placeholder="e.g. Sunrise Senior Living" />
+      </div>
+      <div class="field">
+        <label>Date of visit</label>
+        <input type="date" id="visitDate" />
+      </div>
+      <div class="field">
+        <label>Hours spent</label>
+        <input type="number" id="visitHours" placeholder="e.g. 2" min="0.5" max="12" step="0.5" />
+      </div>
+      <div class="field">
+        <label>Type of facility</label>
+        <select id="facilityType">
+          <option value="">Select type...</option>
+          <option>Nursing Home</option>
+          <option>Memory Care</option>
+          <option>Assisted Living</option>
+          <option>Senior Center</option>
+          <option>Hospice</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Activity (optional)</label>
+        <input type="text" id="visitActivity" placeholder="e.g. Conversation, games, music" />
+      </div>
+      <div class="field full">
+        <label>Reflection (optional)</label>
+        <textarea id="visitNotes" placeholder="What did you talk about? What did you learn?"></textarea>
+      </div>
+    </div>
+    <button class="btn-log" onclick="logVisit()">Log this visit</button>
+  </div>
+
+  <div class="entries-header">
+    <h2>Visit log</h2>
+    <button class="btn-download" onclick="downloadPDF()">
+      <i class="ti ti-download"></i> Download summary PDF
+    </button>
+  </div>
+  <div id="entriesList"></div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+let entries = JSON.parse(localStorage.getItem('gc_entries') || '[]');
+let profile = JSON.parse(localStorage.getItem('gc_profile') || '{}');
+
+function init() {
+  if (profile.name) document.getElementById('volunteerName').value = profile.name;
+  if (profile.org) document.getElementById('volunteerOrg').value = profile.org;
+  document.getElementById('visitDate').value = new Date().toISOString().split('T')[0];
+  renderEntries();
+  updateStats();
+}
+
+function saveProfile() {
+  profile.name = document.getElementById('volunteerName').value.trim();
+  profile.org = document.getElementById('volunteerOrg').value.trim();
+  localStorage.setItem('gc_profile', JSON.stringify(profile));
+  showToast('Profile saved!');
+}
+
+function logVisit() {
+  const facility = document.getElementById('facilityName').value.trim();
+  const date = document.getElementById('visitDate').value;
+  const hours = parseFloat(document.getElementById('visitHours').value);
+  const type = document.getElementById('facilityType').value;
+  const activity = document.getElementById('visitActivity').value.trim();
+  const notes = document.getElementById('visitNotes').value.trim();
+  if (!facility) { showToast('Please enter a facility name.'); return; }
+  if (!date) { showToast('Please select a date.'); return; }
+  if (!hours || hours <= 0) { showToast('Please enter valid hours.'); return; }
+  const entry = { id: Date.now(), facility, date, hours, type, activity, notes };
+  entries.unshift(entry);
+  localStorage.setItem('gc_entries', JSON.stringify(entries));
+  renderEntries();
+  updateStats();
+  clearForm();
+  showToast('Visit logged!');
+}
+
+function deleteEntry(id) {
+  entries = entries.filter(function(e) { return e.id !== id; });
+  localStorage.setItem('gc_entries', JSON.stringify(entries));
+  renderEntries();
+  updateStats();
+  showToast('Entry removed.');
+}
+
+function clearForm() {
+  document.getElementById('facilityName').value = '';
+  document.getElementById('visitHours').value = '';
+  document.getElementById('facilityType').value = '';
+  document.getElementById('visitActivity').value = '';
+  document.getElementById('visitNotes').value = '';
+  document.getElementById('visitDate').value = new Date().toISOString().split('T')[0];
+}
+
+function renderEntries() {
+  const list = document.getElementById('entriesList');
+  if (entries.length === 0) {
+    list.innerHTML = '<div class="empty-entries"><i class="ti ti-clipboard-list"></i><p>No visits logged yet. Add your first one above.</p></div>';
+    return;
+  }
+  list.innerHTML = entries.map(function(e) {
+    const dateStr = new Date(e.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+    return '<div class="entry-card">' +
+      '<div class="entry-left">' +
+        '<div class="entry-facility">' + e.facility + '</div>' +
+        '<div class="entry-meta">' +
+          '<span><i class="ti ti-calendar" style="font-size:13px"></i> ' + dateStr + '</span>' +
+          (e.type ? '<span><i class="ti ti-building" style="font-size:13px"></i> ' + e.type + '</span>' : '') +
+          (e.activity ? '<span><i class="ti ti-activity" style="font-size:13px"></i> ' + e.activity + '</span>' : '') +
+        '</div>' +
+        (e.notes ? '<div class="entry-notes">"' + e.notes + '"</div>' : '') +
+      '</div>' +
+      '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:0.5rem;">' +
+        '<div class="entry-hours">' + e.hours + 'h</div>' +
+        '<button class="btn-delete" onclick="deleteEntry(' + e.id + ')"><i class="ti ti-trash"></i></button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function updateStats() {
+  const totalHours = entries.reduce(function(sum, e) { return sum + e.hours; }, 0);
+  const facilities = new Set(entries.map(function(e) { return e.facility; }));
+  const weeks = new Set(entries.map(function(e) {
+    const d = new Date(e.date + 'T12:00:00');
+    const start = new Date(d.getFullYear(), 0, 1);
+    return d.getFullYear() + '-W' + Math.ceil(((d - start) / 86400000 + start.getDay() + 1) / 7);
+  }));
+  document.getElementById('totalHours').textContent = totalHours % 1 === 0 ? totalHours : totalHours.toFixed(1);
+  document.getElementById('totalVisits').textContent = entries.length;
+  document.getElementById('totalFacilities').textContent = facilities.size;
+  document.getElementById('totalWeeks').textContent = weeks.size;
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 2500);
+}
+
+function downloadPDF() {
+  if (entries.length === 0) { showToast('No entries to download yet.'); return; }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  const name = profile.name || 'Volunteer';
+  const org = profile.org || '';
+  const totalHours = entries.reduce(function(sum, e) { return sum + e.hours; }, 0);
+  const facilities = new Set(entries.map(function(e) { return e.facility; }));
+  const today = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  doc.setFillColor(15, 42, 74);
+  doc.rect(0, 0, 210, 40, 'F');
+  doc.setTextColor(201, 168, 76);
+  doc.setFontSize(18);
+  doc.setFont('helvetica', 'bold');
+  doc.text('GenerationConnect', 15, 16);
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(168, 189, 212);
+  doc.text('Volunteer Hours Summary', 15, 24);
+  doc.text('generation-connect.vercel.app', 15, 31);
+  doc.setTextColor(15, 42, 74);
+  doc.setFontSize(14);
+  doc.setFont('helvetica', 'bold');
+  doc.text(name, 15, 54);
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(100, 100, 100);
+  if (org) doc.text(org, 15, 61);
+  doc.text('Generated: ' + today, 15, org ? 68 : 61);
+  const boxY = org ? 76 : 70;
+  const boxes = [
+    { label: 'Total Hours', value: totalHours % 1 === 0 ? totalHours : totalHours.toFixed(1) },
+    { label: 'Visits', value: entries.length },
+    { label: 'Facilities', value: facilities.size }
+  ];
+  boxes.forEach(function(b, i) {
+    const x = 15 + i * 62;
+    doc.setFillColor(245, 240, 232);
+    doc.roundedRect(x, boxY, 56, 22, 3, 3, 'F');
+    doc.setTextColor(201, 168, 76);
+    doc.setFontSize(16);
+    doc.setFont('helvetica', 'bold');
+    doc.text(String(b.value), x + 28, boxY + 12, { align: 'center' });
+    doc.setTextColor(120, 120, 120);
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'normal');
+    doc.text(b.label, x + 28, boxY + 19, { align: 'center' });
+  });
+  const tableY = boxY + 30;
+  doc.setFillColor(15, 42, 74);
+  doc.rect(15, tableY, 180, 9, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Date', 18, tableY + 6);
+  doc.text('Facility', 50, tableY + 6);
+  doc.text('Type', 115, tableY + 6);
+  doc.text('Activity', 145, tableY + 6);
+  doc.text('Hours', 183, tableY + 6);
+  let y = tableY + 9;
+  const sorted = entries.slice().sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
+  sorted.forEach(function(e, i) {
+    if (y > 270) { doc.addPage(); y = 20; }
+    if (i % 2 === 0) { doc.setFillColor(250, 248, 244); doc.rect(15, y, 180, 9, 'F'); }
+    doc.setTextColor(60, 60, 60);
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'normal');
+    const dateStr = new Date(e.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    doc.text(dateStr, 18, y + 6);
+    doc.text(e.facility.length > 28 ? e.facility.substring(0, 28) + '...' : e.facility, 50, y + 6);
+    doc.text(e.type || '', 115, y + 6);
+    doc.text(e.activity ? (e.activity.length > 16 ? e.activity.substring(0, 16) + '...' : e.activity) : '', 145, y + 6);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(201, 168, 76);
+    doc.text(e.hours + 'h', 185, y + 6);
+    y += 9;
+  });
+  doc.setFillColor(15, 42, 74);
+  doc.rect(0, 285, 210, 12, 'F');
+  doc.setTextColor(90, 122, 154);
+  doc.setFontSize(7);
+  doc.setFont('helvetica', 'normal');
+  doc.text('GenerationConnect  |  generation-connect.vercel.app  |  Connecting volunteers with elder care facilities', 105, 292, { align: 'center' });
+  const filename = (name.replace(/\s+/g, '_') || 'Volunteer') + '_GenerationConnect_Hours.pdf';
+  doc.save(filename);
+}
+
+init();
+</script>
+</body>
+</html>
