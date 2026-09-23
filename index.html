@@ -100,6 +100,34 @@ footer strong { color: #c9a84c; }
   <div class="stat"><div class="stat-num">2 hrs/week</div><div class="stat-label">typical volunteer commitment</div></div>
 </div>
 
+<div style="background:#1a3f6b; padding:1.25rem 2rem;">
+  <div style="max-width:780px; margin:0 auto; display:flex; justify-content:center; gap:3rem; flex-wrap:wrap; text-align:center;">
+    <div>
+      <div style="font-size:1.4rem; font-weight:700; color:#c9a84c;" id="communityVolunteers">—</div>
+      <div style="font-size:0.72rem; color:#7a9bbf; text-transform:uppercase; letter-spacing:0.08em; margin-top:2px;">volunteers joined</div>
+    </div>
+    <div>
+      <div style="font-size:1.4rem; font-weight:700; color:#c9a84c;" id="communityHours">—</div>
+      <div style="font-size:0.72rem; color:#7a9bbf; text-transform:uppercase; letter-spacing:0.08em; margin-top:2px;">hours logged</div>
+    </div>
+    <div>
+      <div style="font-size:1.4rem; font-weight:700; color:#c9a84c;">Growing</div>
+      <div style="font-size:0.72rem; color:#7a9bbf; text-transform:uppercase; letter-spacing:0.08em; margin-top:2px;">community</div>
+    </div>
+  </div>
+</div>
+
+<script>
+fetch('https://api.countapi.xyz/get/generation-connect.vercel.app/volunteers')
+  .then(function(r) { return r.json(); })
+  .then(function(d) { if (d.value) document.getElementById('communityVolunteers').textContent = d.value; })
+  .catch(function() {});
+fetch('https://api.countapi.xyz/get/generation-connect.vercel.app/hours')
+  .then(function(r) { return r.json(); })
+  .then(function(d) { if (d.value) document.getElementById('communityHours').textContent = d.value; })
+  .catch(function() {});
+</script>
+
 <div class="results-area" id="resultsArea">
   <div class="empty">
     <i class="ti ti-heart"></i>
