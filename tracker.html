@@ -214,8 +214,11 @@ function saveProfile() {
 
   // If this is a new volunteer, ping the volunteer counter
   if (isNew || !localStorage.getItem('gc_counted')) {
-    fetch('https://api.countapi.xyz/hit/generation-connect.vercel.app/volunteers')
-      .catch(function() {});
+   fetch(SUPA_URL + '/rest/v1/rpc/increment_stat', {
+  method: 'POST',
+  headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json' },
+  body: JSON.stringify({ stat_key: 'volunteers', increment_by: 1 })
+}).catch(function() {});
     localStorage.setItem('gc_counted', '1');
   }
   showToast('Profile saved!');
@@ -240,9 +243,14 @@ function logVisit() {
   entries.unshift(entry);
   localStorage.setItem('gc_entries', JSON.stringify(entries));
 
-  // Ping hours counter
-  fetch('https://api.countapi.xyz/hit/generation-connect.vercel.app/hours')
-    .catch(function() {});
+ // Update hours in Supabase
+const SUPA_URL = 'https://xnwwksxbjguncejbfsom.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhud3drc3hiamd1bmNlamJmc29tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxODY5MDgsImV4cCI6MjEwNTc2MjkwOH0.UiW56S_uRibVsKjysG3NOTKCjvGzOZofpeoa4H38M9I';
+fetch(SUPA_URL + '/rest/v1/rpc/increment_stat', {
+  method: 'POST',
+  headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json' },
+  body: JSON.stringify({ stat_key: 'hours', increment_by: hours })
+}).catch(function() {});
 
   renderEntries();
   updateStats();
