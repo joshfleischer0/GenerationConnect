@@ -118,14 +118,20 @@ footer strong { color: #c9a84c; }
 </div>
 
 <script>
-fetch('https://api.countapi.xyz/get/generation-connect.vercel.app/volunteers')
-  .then(function(r) { return r.json(); })
-  .then(function(d) { if (d.value) document.getElementById('communityVolunteers').textContent = d.value; })
-  .catch(function() {});
-fetch('https://api.countapi.xyz/get/generation-connect.vercel.app/hours')
-  .then(function(r) { return r.json(); })
-  .then(function(d) { if (d.value) document.getElementById('communityHours').textContent = d.value; })
-  .catch(function() {});
+const SUPA_URL = 'https://xnwwksxbjguncejbfsom.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhud3drc3hiamd1bmNlamJmc29tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxODY5MDgsImV4cCI6MjEwNTc2MjkwOH0.UiW56S_uRibVsKjysG3NOTKCjvGzOZofpeoa4H38M9I';
+
+fetch(SUPA_URL + '/rest/v1/community_stats?select=key,value', {
+  headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
+})
+.then(function(r) { return r.json(); })
+.then(function(rows) {
+  rows.forEach(function(row) {
+    if (row.key === 'volunteers' && row.value > 0) document.getElementById('communityVolunteers').textContent = row.value;
+    if (row.key === 'hours' && row.value > 0) document.getElementById('communityHours').textContent = row.value;
+  });
+})
+.catch(function() {});
 </script>
 
 <div class="results-area" id="resultsArea">
