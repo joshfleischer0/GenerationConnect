@@ -8,7 +8,7 @@
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f0e8; }
-nav { background: #0f2a4a; padding: 1rem 2rem; display: flex; align-items: center; justify-content: space-between; }
+nav { background: #0f2a4a; padding: 0.85rem 2rem; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem; position:sticky; top:0; z-index:100; border-bottom: 1px solid #1a3f6b; }
 .nav-logo { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #c9a84c; font-weight: 600; text-decoration: none; }
 .nav-back { font-size: 0.85rem; color: #a8bdd4; text-decoration: none; display: flex; align-items: center; gap: 5px; }
 .nav-back:hover { color: #c9a84c; }
@@ -109,7 +109,7 @@ nav { background: #0f2a4a; padding: 1rem 2rem; display: flex; align-items: cente
   </div>
 
   <div class="stats-bar">
-    <div class="stat-box"><div class="stat-box-num" id="totalHours">0</div><div class="stat-box-label">Total hours</div></div>
+    <div class="stat-box"><div class="stat-box-num" id="totalHours">0</div><div class="stat-box-label">Your total hours</div></div>
     <div class="stat-box"><div class="stat-box-num" id="clinicalHours">0</div><div class="stat-box-label">Clinical hours</div></div>
     <div class="stat-box"><div class="stat-box-num" id="totalVisits">0</div><div class="stat-box-label">Visits logged</div></div>
     <div class="stat-box"><div class="stat-box-num" id="totalFacilities">0</div><div class="stat-box-label">Facilities</div></div>
@@ -118,22 +118,18 @@ nav { background: #0f2a4a; padding: 1rem 2rem; display: flex; align-items: cente
   <div class="log-card">
     <h2>Log a visit</h2>
     <div class="form-grid">
-
       <div class="field full">
         <label>Facility name</label>
         <input type="text" id="facilityName" placeholder="e.g. Sunrise Senior Living" />
       </div>
-
       <div class="field">
         <label>Date of visit</label>
         <input type="date" id="visitDate" />
       </div>
-
       <div class="field">
         <label>Hours spent</label>
         <input type="number" id="visitHours" placeholder="e.g. 2" min="0.5" max="12" step="0.5" />
       </div>
-
       <div class="field">
         <label>Type of facility</label>
         <select id="facilityType">
@@ -145,12 +141,10 @@ nav { background: #0f2a4a; padding: 1rem 2rem; display: flex; align-items: cente
           <option>Hospice</option>
         </select>
       </div>
-
       <div class="field">
         <label>Activity (optional)</label>
         <input type="text" id="visitActivity" placeholder="e.g. Conversation, games, music" />
       </div>
-
       <div class="field full">
         <label>Experience category</label>
         <div class="category-toggle">
@@ -159,22 +153,18 @@ nav { background: #0f2a4a; padding: 1rem 2rem; display: flex; align-items: cente
         </div>
         <span class="hint">Memory care and hospice visits often count as clinical. Senior centers are typically non-clinical. Check your program's guidelines.</span>
       </div>
-
       <div class="field full">
         <label>Supervisor / Coordinator name</label>
         <input type="text" id="supervisorName" placeholder="e.g. Jane Smith, Activities Director" />
       </div>
-
       <div class="field full">
         <label>Supervisor contact (email or phone)</label>
         <input type="text" id="supervisorContact" placeholder="e.g. jsmith@sunrisesenior.com or (555) 123-4567" />
       </div>
-
       <div class="field full">
         <label>Reflection (optional)</label>
         <textarea id="visitNotes" placeholder="Tip: Note a specific resident interaction, a conversation topic, or something you learned. These details are gold for future med school essays."></textarea>
       </div>
-
     </div>
     <button class="btn-log" onclick="logVisit()">Log this visit</button>
   </div>
@@ -197,6 +187,10 @@ let entries = JSON.parse(localStorage.getItem('gc_entries') || '[]');
 let profile = JSON.parse(localStorage.getItem('gc_profile') || '{}');
 let selectedCategory = 'clinical';
 
+// Shared community stats stored in localStorage with a key
+// that simulates shared storage via a free counter API
+const COUNTER_API = 'https://api.countapi.xyz/hit/generation-connect-vercel-app';
+
 function init() {
   if (profile.name) document.getElementById('volunteerName').value = profile.name;
   if (profile.org) document.getElementById('volunteerOrg').value = profile.org;
@@ -212,9 +206,18 @@ function setCategory(cat) {
 }
 
 function saveProfile() {
+  const isNew = !profile.name;
   profile.name = document.getElementById('volunteerName').value.trim();
   profile.org = document.getElementById('volunteerOrg').value.trim();
+  if (!profile.name) { showToast('Please enter your name.'); return; }
   localStorage.setItem('gc_profile', JSON.stringify(profile));
+
+  // If this is a new volunteer, ping the volunteer counter
+  if (isNew || !localStorage.getItem('gc_counted')) {
+    fetch('https://api.countapi.xyz/hit/generation-connect.vercel.app/volunteers')
+      .catch(function() {});
+    localStorage.setItem('gc_counted', '1');
+  }
   showToast('Profile saved!');
 }
 
@@ -236,6 +239,11 @@ function logVisit() {
   const entry = { id: Date.now(), facility, date, hours, type, activity, notes, supervisorName, supervisorContact, category };
   entries.unshift(entry);
   localStorage.setItem('gc_entries', JSON.stringify(entries));
+
+  // Ping hours counter
+  fetch('https://api.countapi.xyz/hit/generation-connect.vercel.app/hours')
+    .catch(function() {});
+
   renderEntries();
   updateStats();
   clearForm();
@@ -268,14 +276,13 @@ function renderEntries() {
     list.innerHTML = '<div class="empty-entries"><i class="ti ti-clipboard-list"></i><p>No visits logged yet. Add your first one above.</p></div>';
     return;
   }
-
   const clinical = entries.filter(function(e) { return e.category === 'clinical'; });
   const nonclinical = entries.filter(function(e) { return e.category !== 'clinical'; });
 
   function renderCard(e) {
     const dateStr = new Date(e.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
-    const catLabel = e.category === 'clinical' ? 'Clinical' : 'Non-Clinical';
     const catClass = e.category === 'clinical' ? 'clinical' : 'nonclinical';
+    const catLabel = e.category === 'clinical' ? 'Clinical' : 'Non-Clinical';
     return '<div class="entry-card">' +
       '<div class="entry-left">' +
         '<div class="entry-facility">' + e.facility + '</div>' +
@@ -334,8 +341,6 @@ function downloadPDF() {
   const clinHours = entries.filter(function(e) { return e.category === 'clinical'; }).reduce(function(sum, e) { return sum + e.hours; }, 0);
   const facilities = new Set(entries.map(function(e) { return e.facility; }));
   const today = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-
-  // Header
   doc.setFillColor(15, 42, 74);
   doc.rect(0, 0, 210, 40, 'F');
   doc.setTextColor(201, 168, 76);
@@ -347,8 +352,6 @@ function downloadPDF() {
   doc.setTextColor(168, 189, 212);
   doc.text('Volunteer Hours Summary — Application Ready', 15, 24);
   doc.text('generation-connect.vercel.app', 15, 31);
-
-  // Volunteer info
   doc.setTextColor(15, 42, 74);
   doc.setFontSize(14);
   doc.setFont('helvetica', 'bold');
@@ -358,8 +361,6 @@ function downloadPDF() {
   doc.setTextColor(100, 100, 100);
   if (org) doc.text(org, 15, 61);
   doc.text('Generated: ' + today, 15, org ? 68 : 61);
-
-  // Stats boxes
   const boxY = org ? 76 : 70;
   const boxes = [
     { label: 'Total Hours', value: totalHours % 1 === 0 ? totalHours : totalHours.toFixed(1) },
@@ -380,8 +381,6 @@ function downloadPDF() {
     doc.setFont('helvetica', 'normal');
     doc.text(b.label, x + 20, boxY + 19, { align: 'center' });
   });
-
-  // Table
   const tableY = boxY + 30;
   doc.setFillColor(15, 42, 74);
   doc.rect(15, tableY, 180, 9, 'F');
@@ -394,7 +393,6 @@ function downloadPDF() {
   doc.text('Category', 130, tableY + 6);
   doc.text('Supervisor', 158, tableY + 6);
   doc.text('Hrs', 191, tableY + 6);
-
   let y = tableY + 9;
   const sorted = entries.slice().sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
   sorted.forEach(function(e, i) {
@@ -408,8 +406,7 @@ function downloadPDF() {
     doc.text(dateStr, 17, y + 6);
     doc.text(e.facility.length > 22 ? e.facility.substring(0, 22) + '...' : e.facility, 45, y + 6);
     doc.text(e.type || '', 100, y + 6);
-    const catLabel = e.category === 'clinical' ? 'Clinical' : 'Non-Clinical';
-    doc.text(catLabel, 130, y + 6);
+    doc.text(e.category === 'clinical' ? 'Clinical' : 'Non-Clinical', 130, y + 6);
     if (e.supervisorName) {
       doc.text(e.supervisorName.length > 14 ? e.supervisorName.substring(0, 14) + '...' : e.supervisorName, 158, y + 5);
       if (e.supervisorContact) {
@@ -425,8 +422,6 @@ function downloadPDF() {
     doc.text(e.hours + 'h', 192, y + 6);
     y += rowH;
   });
-
-  // Verification line
   y += 8;
   if (y > 260) { doc.addPage(); y = 20; }
   doc.setDrawColor(200, 200, 200);
@@ -436,14 +431,11 @@ function downloadPDF() {
   doc.setFontSize(8);
   doc.setFont('helvetica', 'normal');
   doc.text('This document was generated by the volunteer and is intended for application purposes. Verifying contacts are listed above.', 15, y);
-
-  // Footer
   doc.setFillColor(15, 42, 74);
   doc.rect(0, 285, 210, 12, 'F');
   doc.setTextColor(90, 122, 154);
   doc.setFontSize(7);
   doc.text('GenerationConnect  |  generation-connect.vercel.app  |  Connecting volunteers with elder care facilities', 105, 292, { align: 'center' });
-
   const filename = (name.replace(/\s+/g, '_') || 'Volunteer') + '_GenerationConnect_Hours.pdf';
   doc.save(filename);
 }
