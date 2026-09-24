@@ -98,7 +98,7 @@ nav { background: #0f2a4a; padding: 0.85rem 2rem; display:flex; align-items:cent
     <div class="input-row">
       <div class="input-group">
         <label>Your full name</label>
-        <input type="text" id="volunteerName" placeholder="e.g. Joshua Fleischer" />
+        <input type="text" id="volunteerName" placeholder="Full name" />
       </div>
       <div class="input-group">
         <label>University / Organization</label>
@@ -110,7 +110,6 @@ nav { background: #0f2a4a; padding: 0.85rem 2rem; display:flex; align-items:cent
 
   <div class="stats-bar">
     <div class="stat-box"><div class="stat-box-num" id="totalHours">0</div><div class="stat-box-label">Your total hours</div></div>
-    <div class="stat-box"><div class="stat-box-num" id="clinicalHours">0</div><div class="stat-box-label">Clinical hours</div></div>
     <div class="stat-box"><div class="stat-box-num" id="totalVisits">0</div><div class="stat-box-label">Visits logged</div></div>
     <div class="stat-box"><div class="stat-box-num" id="totalFacilities">0</div><div class="stat-box-label">Facilities</div></div>
   </div>
@@ -130,21 +129,6 @@ nav { background: #0f2a4a; padding: 0.85rem 2rem; display:flex; align-items:cent
         <label>Hours spent</label>
         <input type="number" id="visitHours" placeholder="e.g. 2" min="0.5" max="12" step="0.5" />
       </div>
-      <div class="field">
-        <label>Type of facility</label>
-        <select id="facilityType">
-          <option value="">Select type...</option>
-          <option>Nursing Home</option>
-          <option>Memory Care</option>
-          <option>Assisted Living</option>
-          <option>Senior Center</option>
-          <option>Hospice</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Activity (optional)</label>
-        <input type="text" id="visitActivity" placeholder="e.g. Conversation, games, music" />
-      </div>
       <div class="field full">
         <label>Experience category</label>
         <div class="category-toggle">
@@ -153,14 +137,10 @@ nav { background: #0f2a4a; padding: 0.85rem 2rem; display:flex; align-items:cent
         </div>
         <span class="hint">Memory care and hospice visits often count as clinical. Senior centers are typically non-clinical. Check your program's guidelines.</span>
       </div>
-      <div class="field full">
-        <label>Supervisor / Coordinator name</label>
-        <input type="text" id="supervisorName" placeholder="e.g. Jane Smith, Activities Director" />
-      </div>
-      <div class="field full">
-        <label>Supervisor contact (email or phone)</label>
-        <input type="text" id="supervisorContact" placeholder="e.g. jsmith@sunrisesenior.com or (555) 123-4567" />
-      </div>
+    <div class="field full">
+  <label>Coordinator email (optional)</label>
+  <input type="text" id="supervisorContact" placeholder="e.g. jsmith@facilityname.com" />
+</div>
       <div class="field full">
         <label>Reflection (optional)</label>
         <textarea id="visitNotes" placeholder="Tip: Note a specific resident interaction, a conversation topic, or something you learned. These details are gold for future med school essays."></textarea>
